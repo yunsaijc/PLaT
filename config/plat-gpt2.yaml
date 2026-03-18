@@ -1,0 +1,81 @@
+# PLaT GPT-2 Training Config
+# Inherits from PLaTConfig
+
+# Model config
+model:
+  base_model_name: "/data/jc/models/gpt2"
+  sft_model_path: "./outputs/sft/cot/ckpt-xx"
+  latent_dim: 2048
+  num_latent_for_a_step: 2
+
+  # Planner config
+  planner:
+    type: "backbone_based"
+    use_top_n_layers: -1  # Use all layers
+    add_extra_layers: 2   # Add 2 extra layers
+
+  # Encoder config
+  encoder:
+    input_dim: 768         # GPT-2 hidden_size
+    hidden_dim: 2048       # latent_dim
+    num_layers: 2
+
+  # Decoder config
+  decoder:
+    latent_dim: 2048
+    output_dim: 768
+
+# Data config
+data:
+  data_dir: "./data/data_file/gsm8k"
+  max_length: 128
+  debug_mode: false
+  debug_train_samples: 500
+  debug_eval_samples: 50
+
+# Training config
+train:
+  learning_rate: 0.0005
+  backbone_learning_rate: 0.0005
+  num_train_epochs: 25
+  per_device_train_batch_size: 64
+  per_device_eval_batch_size: 64
+  gradient_accumulation_steps: 2
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  logging_steps: 10
+  save_steps: 500
+  eval_steps: 500
+  save_total_limit: 3
+  load_best_model_at_end: true
+  metric_for_best_model: "eval_acc"
+  greater_is_better: true
+  bf16: true
+  fp16: false
+  seed: 42
+  model_save_dir: "./outputs/plat"
+  dataloader_num_workers: 16
+  preprocessing_num_workers: 8
+
+  deepspeed: "./config/deepspeed_stage_2.json"
+
+  freeze_backbone: false
+
+  # PLaT specific config
+  ema_alpha: 0.5
+  state_transition_mode: "ema"
+  add_dyn_ques_context: true
+
+# LoRA config
+lora:
+  enabled: true
+  r: 128
+  lora_alpha: 32
+  lora_dropout: 0.05
+
+# Wandb config
+wandb:
+  enabled: true
+  project: "plat"
+  experiment: "plat_gpt2"

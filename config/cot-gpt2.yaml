@@ -1,0 +1,52 @@
+# CoT SFT Training Config
+# Matches CoTSFTConfig class
+
+# Top-level model params
+base_model_name: "/data/jc/models/gpt2"
+sft_model_path: null  # Optional: continue from trained SFT model
+vocab_size: null      # Optional: adjust vocab size
+
+# Data config
+data:
+  data_dir: "./data/data_file/gsm8k"
+  max_length: 256
+  debug_mode: false
+  debug_train_samples: 500
+  debug_eval_samples: 50
+
+# LoRA config
+lora:
+  enabled: false
+  r: 128
+  lora_alpha: 32
+  lora_dropout: 0.05
+
+# Training config
+train:
+  learning_rate: 0.0001
+  num_train_epochs: 25
+  per_device_train_batch_size: 64
+  per_device_eval_batch_size: 64
+  gradient_accumulation_steps: 2
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  logging_steps: 10
+  save_steps: 1000
+  eval_steps: 1000
+  save_total_limit: 1000  # Keep only best 3 checkpoints
+  load_best_model_at_end: true
+  metric_for_best_model: "eval_acc"
+  greater_is_better: true
+  bf16: true
+  fp16: false
+  seed: 42
+  model_save_dir: "./outputs/sft"
+  dataloader_num_workers: 16  # DataLoader workers
+  preprocessing_num_workers: 8  # Preprocessing workers
+
+# Wandb config
+wandb:
+  enabled: true
+  project: "plat"
+  experiment: "cot"

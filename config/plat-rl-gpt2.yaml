@@ -1,0 +1,101 @@
+# PLaT RL Training Config
+
+# Model config
+model:
+  base_model_name: "/data/jc/models/gpt2"
+  sft_model_path: "./outputs/sft/cot/ckpt-xx"
+  latent_dim: 4096
+  num_latent_for_a_step: 2
+
+  # Planner config
+  planner:
+    type: "backbone_based"
+    use_top_n_layers: -1
+    add_extra_layers: 2
+
+  # Encoder config
+  encoder:
+    input_dim: 2048
+    hidden_dim: 4096
+    num_layers: 2
+
+  # Decoder config
+  decoder:
+    latent_dim: 4096
+    output_dim: 2048
+
+# Data config
+data:
+  data_dir: "./data/data_file/gsm8k"
+  max_length: 128
+  debug_mode: false
+  debug_train_samples: 500
+  debug_eval_samples: 50
+
+# Training config
+train:
+  learning_rate: 0.000001
+  backbone_learning_rate: 0.000001
+  num_train_epochs: 1
+  per_device_train_batch_size: 8
+  per_device_eval_batch_size: 32
+  gradient_accumulation_steps: 4
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  logging_steps: 10
+  save_steps: 100
+  eval_steps: 100
+  save_total_limit: 3
+  load_best_model_at_end: true
+  metric_for_best_model: "eval_acc"
+  greater_is_better: true
+  bf16: true
+  fp16: false
+  seed: 42
+  model_save_dir: "./outputs/rl"
+  dataloader_num_workers: 8
+  preprocessing_num_workers: 4
+
+  deepspeed: "./config/deepspeed_stage_2.json"
+  
+  freeze_backbone: true
+  # PLaT specific config
+  ema_alpha: 0.5
+  state_transition_mode: "ema"
+  add_dyn_ques_context: true
+
+# LoRA config
+lora:
+  enabled: true
+  r: 128
+  lora_alpha: 32
+  lora_dropout: 0.05
+
+# Wandb config
+wandb:
+  enabled: true
+  project: "plat"
+  experiment: "plat_rl"
+
+# RL
+rl:
+  # Generation settings
+  max_steps: 20
+  temperature: 0.9
+  do_sample: true
+  num_generations: 8
+  
+  # KL penalty
+  kl_beta: 0.01
+  clip_eps: 0.2
+  
+  # Reward config
+  correct_answer_reward: 1.0
+  incorrect_answer_penalty: -0.2
+  valid_answer_reward: 0.2
+  invalid_answer_penalty: -0.2
+  valid_equation_reward: 0.2
+  
+  # Train intermediate steps
+  train_intermediate_steps: true
